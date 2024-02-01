@@ -23,7 +23,7 @@ const initialPrompt = [
 const addDeptPrompt = [
     {
         type: 'input',
-        name: 'deptName',
+        name: 'dept_name',
         message: 'What is the department name you want to add'
     }
 ];
@@ -31,7 +31,7 @@ const addDeptPrompt = [
 const addRolePrompt = [
     {
         type: 'input',
-        name: 'role',
+        name: 'role_name',
         message: 'What is the name of the role you want to add'
     },
     {
@@ -49,22 +49,22 @@ const addRolePrompt = [
 const addEmployeePrompt = [
     {
         type: 'input',
-        name: 'empFirstName',
+        name: 'first_name',
         message: 'What is the employee\'s First name?'
     },
     {
         type: 'input',
-        name: 'empLastName',
+        name: 'last_name',
         message: 'What is the employee\'s Last name?'
     },
     {
         type: 'input',
-        name: 'empRole',
+        name: 'role_name',
         message: 'What is the employee\'s role?'
     },
     {
         type: 'input',
-        name: 'manager',
+        name: 'manager_name',
         message: 'Who is the employee\'s manager?'
     }
 ];
@@ -82,25 +82,28 @@ const updateEmployeePrompt = [
     }
 ];
 
-async function actionPrompt() {
+async function actionPrompt(dept, role, employee, updateEmployee) {
     try {
         const answers = await inquirer.prompt(initialPrompt);
 
         if (answers.initialPrompt === 'add department') {
-            await inquirer.prompt(addDeptPrompt);
+            const dept = await inquirer.prompt(addDeptPrompt);
+            
         } else if (answers.initialPrompt === 'add a role') {
-            await inquirer.prompt(addRolePrompt);
+            const role = await inquirer.prompt(addRolePrompt);
+            
         } else if (answers.initialPrompt === 'add an employee') {
-            await inquirer.prompt(addEmployeePrompt);
+            const employee = await inquirer.prompt(addEmployeePrompt);
+           
         } else if (answers.initialPrompt === 'update an employee') {
-            await inquirer.prompt(updateEmployeePrompt);
+           const updateEmployee = await inquirer.prompt(updateEmployeePrompt);
+            
         }
     } catch (error) {
         console.error('Error during prompts:', error);
     }
 }
 
-actionPrompt();
 
-module.exports = index;
+module.exports = actionPrompt;
 
