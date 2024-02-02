@@ -1,36 +1,19 @@
-// open the application and be prompted. ( using inquirer)
-// view all depts, view all roles, view all employeees, add dept, add role, add employee,update employee role
-// when view dept is chosen a table is shown with dept names and dept ids. ill do this by creating a schema and then doing  a get request in order to view the information.
-// when view all roles is chosen a table with job title, role id, the dept it belongs to, and the salary for the role. this will be done once again by creating a table with schema and then using a GET request to view the info
-// view all employees a table is shown with employee id, first and last, job title, dept, salaries, and managers the empoyee reports to. Also using a GET request
-// add a dept - post request to add to dept table
-// add an employee - post request to add to employee table
-// update employee role get back selected employee modify info and then send it back to the table. USING GET/POST
-
 const inquirer = require('inquirer');
-
 const mysql = require('mysql2');
 
-
-
-const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    user: 'root',
-    password: 'Alc12096!',
-    database: 'workplace_db'
-  },
-  console.log(`Connected to the workplace_db database.`)
-);
-
-
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'Alc12096!',
+  database: 'workplace_db'
+}, console.log(`Connected to the workplace_db database.`));
 
 const initialPrompt = [
     {
         type: 'list',
         name: 'initialPrompt',
         message: 'What would you like to do?',
-        choices: ['view all departments', 'view all roles', 'view all employees', 'add department', 'add a role', 'add an employee', 'update an employee']
+        choices: ['view all departments', 'view all roles', 'view all employees', 'add department', 'add a role', 'add an employee', 'update an employee', 'exit']
     }
 ];
 
@@ -53,11 +36,11 @@ const addRolePrompt = [
         name: 'salary',
         message: 'What is the salary for this role?'
     },
-    // {
-    //     type: 'input',
-    //     name: 'deptAssociation',
-    //     message: 'What is the department associated with this role?'
-    // }
+    {
+        type: 'input',
+        name: 'deptAssociation',
+        message: 'What is the department associated with this role?'
+    }
 ];
 
 const addEmployeePrompt = [
@@ -96,48 +79,118 @@ const updateEmployeePrompt = [
     }
 ];
 
-async function actionPrompt() {
-    try {
-        const answers = await inquirer.prompt(initialPrompt);
-
-        if (answers.initialPrompt === 'add department') {
-            const dept = await inquirer.prompt(addDeptPrompt);
-            db.query(`INSERT INTO department (dept_name) VALUES ('${dept.dept_name}')`, (error, results) => {
-                if (error) {
-                  console.error(error);
-                } else {
-                  console.logm('Department added successfully.', results);
-                }
-              });
-              
-            
-        } else if (answers.initialPrompt === 'add a role') {
-            const role = await inquirer.prompt(addRolePrompt);
-            console.log(role)
-
-            db.query('INSERT INTO roles (role_name, salary) VALUES (?, ?)', [role.role_name, role.salary], (error, results) => {
-                if (error) {
-                  console.error(error);
-                } else {
-                  console.log('Role added successfully.', results);
-                }
-              });
-              
-            
-        } else if (answers.initialPrompt === 'add an employee') {
-            const employee = await inquirer.prompt(addEmployeePrompt);
-            console.log(employee)
-           
-        } else if (answers.initialPrompt === 'update an employee') {
-           const updateEmployee = await inquirer.prompt(updateEmployeePrompt);
-           console.log(updateEmployee);
-            
+async function viewAllDepartments() {
+    db.query('SELECT * FROM department', (err, results) => {
+        if (err) {
+            console.error(err);
+        } else {
+            console.table(results);
         }
-    } catch (error) {
-        console.error(error);
+    });
+}
+
+async function viewAllRoles() {
+    db.query('SELECT * FROM roles', (err, results) => {
+        if (err) {
+            console.error(err);
+        } else {
+            console.table(results);
+        }
+    });
+}
+
+async function viewAllEmployees() {
+    db.query('SELECT * FROM employee', (err, results) => {
+        if (err) {
+            console.error(err);
+        } else {
+            console.table(results);
+        }
+    });
+}
+
+async function addDepartment() {
+    const dept = await inquirer.prompt(addDeptPrompt);
+    db.query('INSERT INTO department (dept_name) VALUES (?)', [dept.dept_name], (error, results) => {
+        if (error) {
+            console.error(error);
+        } else {
+            console.log('Department added successfully.', results);
+        }
+    });
+}
+
+async function addRole() {
+    const role = await inquirer.prompt(addRolePrompt);
+    db.query('INSERT INTO roles (role_name, salary, dept_id) VALUES (?, ?, ?)', [role.role_name, role.salary, role.dept_id], (error, results) => {
+        if (error) {
+            console.error(error);
+        } else {
+            console.log('Role added successfully.', results);
+        }
+    });
+}
+
+async function addEmployee() {
+    const employee = await inquirer.prompt(addEmployeePrompt);
+    
+  
+}
+
+async function updateEmployee() {
+    const updateEmployee = await inquirer.prompt(updateEmployeePrompt);
+    
+    
+}
+
+async function prompt() {
+    while (true) {
+        try {
+            const answers = await inquirer.prompt(initialPrompt);
+
+            switch (answers.initialPrompt) {
+                case 'view all departments':
+                    await viewAllDepartments();
+                    break;
+
+                case 'view all roles':
+                    await viewAllRoles();
+                    break;
+
+                case 'view all employees':
+                    await viewAllEmployees();
+                    break;
+
+                case 'add department':
+                    await addDepartment();
+                    break;
+
+                case 'add a role':
+                    await addRole();
+                    break;
+
+                case 'add an employee':
+                    await addEmployee();
+                    break;
+
+                case 'update an employee':
+                    await updateEmployee();
+                    break;
+
+                case 'exit':
+                    console.log('Exiting the application.');
+                    return; 
+
+                default:
+                    console.log('Invalid option');
+                    break;
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 }
 
-actionPrompt();
-module.exports = actionPrompt;
+prompt();  
+
 
