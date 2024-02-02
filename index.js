@@ -1,4 +1,3 @@
-
 // open the application and be prompted. ( using inquirer)
 // view all depts, view all roles, view all employeees, add dept, add role, add employee,update employee role
 // when view dept is chosen a table is shown with dept names and dept ids. ill do this by creating a schema and then doing  a get request in order to view the information.
@@ -9,6 +8,21 @@
 // update employee role get back selected employee modify info and then send it back to the table. USING GET/POST
 
 const inquirer = require('inquirer');
+
+const mysql = require('mysql2');
+
+
+
+const db = mysql.createConnection(
+  {
+    host: 'localhost',
+    user: 'root',
+    password: 'Alc12096!',
+    database: 'workplace_db'
+  },
+  console.log(`Connected to the workplace_db database.`)
+);
+
 
 
 const initialPrompt = [
@@ -39,11 +53,11 @@ const addRolePrompt = [
         name: 'salary',
         message: 'What is the salary for this role?'
     },
-    {
-        type: 'input',
-        name: 'deptAssociation',
-        message: 'What is the department associated with this role?'
-    }
+    // {
+    //     type: 'input',
+    //     name: 'deptAssociation',
+    //     message: 'What is the department associated with this role?'
+    // }
 ];
 
 const addEmployeePrompt = [
@@ -82,28 +96,48 @@ const updateEmployeePrompt = [
     }
 ];
 
-async function actionPrompt(dept, role, employee, updateEmployee) {
+async function actionPrompt() {
     try {
         const answers = await inquirer.prompt(initialPrompt);
 
         if (answers.initialPrompt === 'add department') {
             const dept = await inquirer.prompt(addDeptPrompt);
+            db.query(`INSERT INTO department (dept_name) VALUES ('${dept.dept_name}')`, (error, results) => {
+                if (error) {
+                  console.error(error);
+                } else {
+                  console.logm('Department added successfully.', results);
+                }
+              });
+              
             
         } else if (answers.initialPrompt === 'add a role') {
             const role = await inquirer.prompt(addRolePrompt);
+            console.log(role)
+
+            db.query('INSERT INTO roles (role_name, salary) VALUES (?, ?)', [role.role_name, role.salary], (error, results) => {
+                if (error) {
+                  console.error(error);
+                } else {
+                  console.log('Role added successfully.', results);
+                }
+              });
+              
             
         } else if (answers.initialPrompt === 'add an employee') {
             const employee = await inquirer.prompt(addEmployeePrompt);
+            console.log(employee)
            
         } else if (answers.initialPrompt === 'update an employee') {
            const updateEmployee = await inquirer.prompt(updateEmployeePrompt);
+           console.log(updateEmployee);
             
         }
     } catch (error) {
-        console.error('Error during prompts:', error);
+        console.error(error);
     }
 }
 
-
+actionPrompt();
 module.exports = actionPrompt;
 
